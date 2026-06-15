@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>V2X Route Planning</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+
+    <style>
+        html, body, #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #tip {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+    </style>
+
+    <script src="https://webapi.amap.com/maps?v=2.0&key=你的高德Key&plugin=AMap.Driving"></script>
+</head>
+
+<body>
+<div id="container"></div>
+<div id="tip">Click map to select start point.</div>
+
+<script>
+    var map = new AMap.Map('container', {
+        zoom: 15,
+        center: [116.206490, 39.929413]
+    });
+
+    var startPoint = null;
+    var endPoint = null;
+    var startMarker = null;
+    var endMarker = null;
+    var driving = null;
+
+    var tip = document.getElementById("tip");
+
+    // 创建驾车路线规划对象
+    driving = new AMap.Driving({
+        map: map,
+        policy: AMap.DrivingPolicy.LEAST_TIME
+    });
+
+    map.on('click', function (e) {
+        var lng = e.lnglat.getLng();
+        var lat = e.lnglat.getLat();
+        var point = [lng, lat];
+
+        // 第一次点击：设置起点
+        if (startPoint === null) {
+            startPoint = point;
+
+            startMarker = new AMap.Marker({
+                position: startPoint,
+                map: map,
+                label: {
+                    content: "Start",
+                    direction: "top"
+                }
+            });
+
+            tip.innerHTML = "Start: " + lng.toFixed(6) + ", " + lat.toFixed(6)
+                + "<br>Click map to select end point.";
+
+            return;
+        }
+
+        // 第二次点击：设置终点并规划路线
+        if (endPoint === null) {
+            endPoint = point;
+
+            endMarker = new AMap.Marker({
+                position: endPoint,
+                map: map,
+                label: {
+                    content: "End",
+                    direction: "top"
+                }
+            });
+
+            tip.innerHTML = "Planning route...";
+
+            driving.search(startPoint, endPoint, function (status, result) {
+                if (status === 'complete') {
+                    tip.innerHTML =
+                        "Route planning succeeded.<br>" +
+                        "Start: " + startPoint[0].toFixed(6) + ", " + startPoint[1].toFixed(6) + "<br>" +
+                        "End: " + endPoint[0].toFixed(6) + ", " + endPoint[1].toFixed(6);
+                } else {
+                    tip.innerHTML = "Route planning failed. Please try again.";
+                    console.log(result);
+                }
+            });
+
+            return;
+        }
+
+        // 第三次点击：重新开始
+        map.clearMap();
+
+        driving.clear();
+
+        startPoint = point;
+        endPoint = null;
+
+        startMarker = new AMap.Marker({
+            position: startPoint,
+            map: map,
+            label: {
+                content: "Start",
+                direction: "top"
+            }
+        });
+
+        tip.innerHTML = "New start selected.<br>Click map to select end point.";
+    });
+</script>
+</body>
+</html>
