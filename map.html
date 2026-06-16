@@ -24,7 +24,7 @@
             font-size: 14px;
             line-height: 22px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-            max-width: 360px;
+            max-width: 380px;
         }
 
         .amap-marker-label {
@@ -35,6 +35,13 @@
             font-size: 12px;
         }
     </style>
+
+    <!-- 高德安全密钥：必须放在高德 JS API 加载之前 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: "de578da6995ef378140443b7e30ba0e5"
+        };
+    </script>
 
     <!-- 加载高德地图 JS API，并启用驾车路径规划插件 -->
     <script src="https://webapi.amap.com/maps?v=2.0&key=10ce72d3ed7b315bffe56bb7eb97f106&plugin=AMap.Driving"></script>
