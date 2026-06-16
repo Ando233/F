@@ -25,10 +25,18 @@
             line-height: 22px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         }
+
+        .amap-marker-label {
+            border: 1px solid #999;
+            background: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 
-    <!-- 把 YOUR_AMAP_KEY 替换成你自己的高德 Key -->
-    <script src="https://webapi.amap.com/maps?v=2.0&key=YOUR_AMAP_KEY&plugin=AMap.Driving"></script>
+    <!-- 加载高德地图 JS API，并启用驾车路径规划插件 -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=10ce72d3ed7b315bffe56bb7eb97f106&plugin=AMap.Driving"></script>
 </head>
 
 <body>
@@ -36,23 +44,31 @@
 <div id="tip">Click the map to select the start point.</div>
 
 <script>
+    // 创建地图，默认定位到北方工业大学附近
     var map = new AMap.Map('container', {
         zoom: 15,
-        center: [116.206490, 39.929413]
+        center: [116.206490, 39.929413],
+        resizeEnable: true
     });
 
+    // 起点、终点
     var startPoint = null;
     var endPoint = null;
+
+    // 起点、终点标记
     var startMarker = null;
     var endMarker = null;
 
+    // 左上角提示框
     var tip = document.getElementById("tip");
 
+    // 创建驾车路径规划对象
     var driving = new AMap.Driving({
         map: map,
         policy: AMap.DrivingPolicy.LEAST_TIME
     });
 
+    // 点击地图选择起点和终点
     map.on('click', function (e) {
         var lng = e.lnglat.getLng();
         var lat = e.lnglat.getLat();
@@ -72,14 +88,14 @@
             });
 
             tip.innerHTML =
-                "Start selected:<br>" +
+                "Start point selected:<br>" +
                 lng.toFixed(6) + ", " + lat.toFixed(6) +
-                "<br>Click the map to select the end point.";
+                "<br><br>Click the map to select the end point.";
 
             return;
         }
 
-        // 第二次点击：设置终点并规划路线
+        // 第二次点击：设置终点，并规划路径
         if (endPoint === null) {
             endPoint = point;
 
@@ -99,13 +115,13 @@
                     tip.innerHTML =
                         "Route planning succeeded.<br>" +
                         "Start: " + startPoint[0].toFixed(6) + ", " + startPoint[1].toFixed(6) + "<br>" +
-                        "End: " + endPoint[0].toFixed(6) + ", " + endPoint[1].toFixed(6) + "<br>" +
+                        "End: " + endPoint[0].toFixed(6) + ", " + endPoint[1].toFixed(6) + "<br><br>" +
                         "Click again to reset.";
                 } else {
                     tip.innerHTML =
                         "Route planning failed.<br>" +
                         "Please check your AMap Key or try another point.";
-                    console.log(result);
+                    console.log("Route planning failed:", result);
                 }
             });
 
@@ -129,9 +145,9 @@
         });
 
         tip.innerHTML =
-            "New start selected:<br>" +
+            "New start point selected:<br>" +
             lng.toFixed(6) + ", " + lat.toFixed(6) +
-            "<br>Click the map to select the end point.";
+            "<br><br>Click the map to select the end point.";
     });
 </script>
 </body>
