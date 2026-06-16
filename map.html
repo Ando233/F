@@ -24,6 +24,7 @@
             font-size: 14px;
             line-height: 22px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            max-width: 360px;
         }
 
         .amap-marker-label {
@@ -46,23 +47,20 @@
 <script>
     // 创建地图，默认定位到北方工业大学附近
     var map = new AMap.Map('container', {
-        zoom: 15,
+        zoom: 16,
         center: [116.206490, 39.929413],
         resizeEnable: true
     });
 
-    // 起点、终点
     var startPoint = null;
     var endPoint = null;
 
-    // 起点、终点标记
     var startMarker = null;
     var endMarker = null;
 
-    // 左上角提示框
     var tip = document.getElementById("tip");
 
-    // 创建驾车路径规划对象
+    // 创建驾车路线规划对象
     var driving = new AMap.Driving({
         map: map,
         policy: AMap.DrivingPolicy.LEAST_TIME
@@ -95,7 +93,7 @@
             return;
         }
 
-        // 第二次点击：设置终点，并规划路径
+        // 第二次点击：设置终点，并进行路径规划
         if (endPoint === null) {
             endPoint = point;
 
@@ -118,17 +116,34 @@
                         "End: " + endPoint[0].toFixed(6) + ", " + endPoint[1].toFixed(6) + "<br><br>" +
                         "Click again to reset.";
                 } else {
+                    var errorInfo = "";
+
+                    if (result && result.info) {
+                        errorInfo = result.info;
+                    } else if (result && result.message) {
+                        errorInfo = result.message;
+                    } else if (result) {
+                        errorInfo = JSON.stringify(result);
+                    } else {
+                        errorInfo = "Unknown error";
+                    }
+
                     tip.innerHTML =
                         "Route planning failed.<br>" +
-                        "Please check your AMap Key or try another point.";
-                    console.log("Route planning failed:", result);
+                        "Status: " + status + "<br>" +
+                        "Info: " + errorInfo + "<br><br>" +
+                        "Try selecting points on main roads.";
+
+                    console.log("Route planning failed.");
+                    console.log("Status:", status);
+                    console.log("Result:", result);
                 }
             });
 
             return;
         }
 
-        // 第三次点击：清空旧路线，重新设置起点
+        // 第三次点击：清空旧路径，重新设置起点
         map.clearMap();
         driving.clear();
 
